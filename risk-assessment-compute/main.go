@@ -76,7 +76,10 @@ func getRiskDefinitionValues(category, subCategory string, d *deps) (float64, st
 		},
 	}
 
-	result, _ := db.GetItem(input)
+	result, errGetItem := db.GetItem(input)
+	if errGetItem != nil {
+		fmt.Println(errGetItem)
+	}
 	res := RiskDefinitionsData{}
 	dynamodbattribute.UnmarshalMap(result.Item, &res)
 
@@ -107,7 +110,7 @@ func calculatePlantRiskScore(contractCategoryWeight,
 	projectSubCategoryValue,
 	approvalSubCategoryValue,
 	hostCountryApprovalSubCategoryValue,
-	methodologySubCategoryValue string) float64 {
+	methodologySubCategoryValue string) (float64, error) {
 
 	fmt.Println("contractCategoryWeight: ", contractCategoryWeight)
 	fmt.Println("projectCategoryWeight: ", projectCategoryWeight)
@@ -137,9 +140,13 @@ func calculatePlantRiskScore(contractCategoryWeight,
 		tempRiskScore, _ := decimal.NewFromString("10.0")
 		riskScore, _ = tempRiskScore.Float64()
 	}
+
+	if riskScore > 100 || riskScore < 0 {
+		return riskScore, errors.New("risk score cannot be greater than 100 or less than 0")
+	}
 	fmt.Println("riskType: ", reflect.TypeOf(riskScore))
 
-	return riskScore
+	return riskScore, nil
 }
 
 // function for getting all data required for calculation and returnign risk score
@@ -157,7 +164,10 @@ func plantRiskComputation(pk string, sk string, d *deps) (float64, error) {
 			},
 		},
 	}
-	result, _ := db.GetItem(input)
+	result, errGetItem := db.GetItem(input)
+	if errGetItem != nil {
+		fmt.Println(errGetItem)
+	}
 
 	res := RiskAssessmentData{}
 	dynamodbattribute.UnmarshalMap(result.Item, &res)
@@ -182,7 +192,7 @@ func plantRiskComputation(pk string, sk string, d *deps) (float64, error) {
 	if contractErrValue != nil || projectErrValue != nil || approvalErrValue != nil || hostCountryApprovalErrValue != nil || methodologyErrValue != nil {
 		return 0, errors.New("error, cannot divide with zero(0)")
 	}
-	riskScore := calculatePlantRiskScore(contractCategoryWeight,
+	riskScore, errRiskScore := calculatePlantRiskScore(contractCategoryWeight,
 		projectCategoryWeight,
 		approvalCategoryWeight,
 		hostCountryApprovalCategoryWeight,
@@ -192,6 +202,9 @@ func plantRiskComputation(pk string, sk string, d *deps) (float64, error) {
 		hostCountryApprovalSubCategoryValue,
 		methodologySubCategoryValue)
 
+	if errRiskScore != nil {
+		return riskScore, errors.New(errRiskScore.Error())
+	}
 	fmt.Println("riskScore: ", riskScore)
 
 	return riskScore, nil
@@ -208,6 +221,7 @@ func putRiskScore(pk, sk string, riskScore float64, d *deps) {
 		fmt.Println("Got error while building update expression")
 	}
 
+	fmt.Println("before update")
 	tableName := "RiskAssessmentTable"
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String(tableName),
@@ -225,6 +239,7 @@ func putRiskScore(pk, sk string, riskScore float64, d *deps) {
 	}
 
 	_, errUpdate := db.UpdateItem(input)
+	fmt.Println("after update")
 	if errUpdate != nil {
 		fmt.Println(errUpdate)
 	} else {

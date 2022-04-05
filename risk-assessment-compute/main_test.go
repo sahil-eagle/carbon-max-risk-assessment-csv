@@ -19,7 +19,14 @@ type mockedGetItem struct {
 	ResponseQuery dynamodb.GetItemOutput
 }
 
+// mock session for testing zero divide errors
 type mockedGetItemZeroValueCheck struct {
+	dynamodbiface.DynamoDBAPI
+	ResponseQuery dynamodb.GetItemOutput
+}
+
+// mock session for testing minimum maximum value check
+type mockedGetItemMinMaxValueCheck struct {
 	dynamodbiface.DynamoDBAPI
 	ResponseQuery dynamodb.GetItemOutput
 }
@@ -195,8 +202,101 @@ func (d mockedGetItemZeroValueCheck) GetItem(input *dynamodb.GetItemInput) (*dyn
 	return &dynamodb.GetItemOutput{}, err
 }
 
-// mocking update item of main function
+// for 3rd test for min max value check
+func (d2 mockedGetItemMinMaxValueCheck) GetItem(input *dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error) {
+
+	var err = errors.New("item not found")
+	val, ok := input.Key["pk"]
+	if ok {
+		if strings.HasPrefix(*val.S, "sellerName") { // structuring getItem for a different getItem function for sellerName in main
+			pk := dynamodb.AttributeValue{}
+			pk.SetS("sellerName#Renew Power")
+			sk := dynamodb.AttributeValue{}
+			sk.SetS("registryProjectName#Renewable Solar Power Project by ReNew Solar Power Private Limited#plantName#Abha Solarfarms Limited")
+			contractStatus := dynamodb.AttributeValue{}
+			contractStatus.SetS("LOC")
+			projectStatus := dynamodb.AttributeValue{}
+			projectStatus.SetS("Constructed")
+			approvalStatus := dynamodb.AttributeValue{}
+			approvalStatus.SetS("Under Registration")
+			hostCountryApproval := dynamodb.AttributeValue{}
+			hostCountryApproval.SetS("Yes")
+			methodology := dynamodb.AttributeValue{}
+			methodology.SetS("Solar Power")
+			resp := make(map[string]*dynamodb.AttributeValue)
+			resp["pk"] = &pk
+			resp["sk"] = &sk
+			resp["contractStatus"] = &contractStatus
+			resp["projectStatus"] = &projectStatus
+			resp["approvalStatus"] = &approvalStatus
+			resp["hostCountryApproval"] = &hostCountryApproval
+			resp["methodology"] = &methodology
+
+			output := &dynamodb.GetItemOutput{
+				Item: resp,
+			}
+			return output, nil
+		} else if strings.HasPrefix(*val.S, "categoryName") { // structuring getItem for a different getItem function for catergoryName in main
+			pk := dynamodb.AttributeValue{}
+			sk := dynamodb.AttributeValue{}
+			subCategoryValue := dynamodb.AttributeValue{}
+			categoryWeightage := dynamodb.AttributeValue{}
+			fmt.Println("*val.S: ", *val.S)
+			if strings.Contains(*val.S, "Contract") {
+				pk.SetS("categoryName#Contract Status")
+				sk.SetS("subCategoryName#LOC")
+				subCategoryValue.SetS("50%")
+				categoryWeightage.SetS("6/13")
+			} else if strings.Contains(*val.S, "Project") {
+				pk.SetS("categoryName#Project Status")
+				sk.SetS("subCategoryName#Constructed")
+				subCategoryValue.SetS("100%")
+				categoryWeightage.SetS("6/13")
+			} else if strings.Contains(*val.S, "Host") {
+				pk.SetS("categoryName#Host Country Approval")
+				sk.SetS("subCategoryName#Yes")
+				subCategoryValue.SetS("100%")
+				categoryWeightage.SetS("6/13")
+			} else if strings.Contains(*val.S, "Registration") {
+				pk.SetS("categoryName#Registration Status")
+				sk.SetS("subCategoryName#Under Registration")
+				subCategoryValue.SetS("75%")
+				categoryWeightage.SetS("6/13")
+			} else if strings.Contains(*val.S, "Methodology") {
+				pk.SetS("categoryName#Methodology")
+				sk.SetS("subCategoryName#Solar Power")
+				subCategoryValue.SetS("100%")
+				categoryWeightage.SetS("6/13")
+			}
+
+			resp := make(map[string]*dynamodb.AttributeValue)
+			resp["pk"] = &pk
+			resp["sk"] = &sk
+			resp["subCategoryValue"] = &subCategoryValue
+			resp["categoryWeightage"] = &categoryWeightage
+
+			output := &dynamodb.GetItemOutput{
+				Item: resp,
+			}
+			return output, nil
+		}
+
+	}
+	return &dynamodb.GetItemOutput{}, err
+}
+
+// test1:- mocking update item of main function
 func (d mockedGetItem) UpdateItem(input *dynamodb.UpdateItemInput) (*dynamodb.UpdateItemOutput, error) {
+	return &dynamodb.UpdateItemOutput{}, nil // empty because updateItem generally dont necessarily need output
+}
+
+// test2:- mocking update item of main function
+func (d mockedGetItemZeroValueCheck) UpdateItem(input *dynamodb.UpdateItemInput) (*dynamodb.UpdateItemOutput, error) {
+	return &dynamodb.UpdateItemOutput{}, nil // empty because updateItem generally dont necessarily need output
+}
+
+// test3:- mocking update item of main function
+func (d mockedGetItemMinMaxValueCheck) UpdateItem(input *dynamodb.UpdateItemInput) (*dynamodb.UpdateItemOutput, error) {
 	return &dynamodb.UpdateItemOutput{}, nil // empty because updateItem generally dont necessarily need output
 }
 
@@ -238,12 +338,39 @@ func TestLambdaReadHandler(t *testing.T) {
 	// test2:- checking error for division by zero
 	t.Run("check division with zero", func(t *testing.T) {
 		_, errString := d1.handler(inputEvent)
+
 		if errString == nil {
 			panic("cannot divide by zero(0) error should be there")
+		} else {
+			fmt.Println("errString:", errString)
 		}
 
 		expectedErrorMessage := "error, cannot divide with zero(0)"
 		actualErrorMessage := errString.Error()
+		assert.Equal(t, expectedErrorMessage, actualErrorMessage)
+	})
+
+	// structuring a mocked dynamodb session for get item for test3
+	m2 := mockedGetItemMinMaxValueCheck{
+		ResponseQuery: dynamodb.GetItemOutput{},
+	}
+
+	d2 := deps{
+		ddb: m2, //mock session
+	}
+
+	// test3:- test for minimum maximum value of risk scores
+	t.Run("minimum & maximum value test", func(t *testing.T) {
+		riskScore, errValue := d2.handler(inputEvent)
+
+		if errValue == nil {
+			errString := fmt.Sprintf("value of risk score(%s) which is greater than 100 or less than 0 error should be there", riskScore)
+			panic(errString)
+		} else {
+			fmt.Println("errValue: ", errValue)
+		}
+		expectedErrorMessage := "risk score cannot be greater than 100 or less than 0"
+		actualErrorMessage := errValue.Error()
 		assert.Equal(t, expectedErrorMessage, actualErrorMessage)
 	})
 
