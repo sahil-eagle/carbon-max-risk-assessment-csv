@@ -61,12 +61,8 @@ type RiskScoreData struct {
 	RiskScore float64 `json:"riskScore"`
 }
 
+// function to get risk definition values for calculation of risk
 func getRiskDefinitionValues(category, subCategory string, d *deps) (float64, string, error) {
-	// sess := session.Must(session.NewSessionWithOptions(session.Options{
-	// 	SharedConfigState: session.SharedConfigEnable,
-	// }))
-	// db := dynamodb.New(sess)
-
 	db := d.ddb
 	input := &dynamodb.GetItemInput{
 		TableName: aws.String("RiskAssessmentTable"),
@@ -93,7 +89,6 @@ func getRiskDefinitionValues(category, subCategory string, d *deps) (float64, st
 	valueTwo, _ := decimal.NewFromString(categoryWeightageSplitValue[1])
 	tempStringCompareValue, _ := decimal.NewFromString("0")
 	if valueTwo.Equal(tempStringCompareValue) {
-		fmt.Println("valueTwo: ", valueTwo)
 		return 0, "", errors.New("cannot divide with 0(zero) values")
 	}
 
@@ -103,6 +98,7 @@ func getRiskDefinitionValues(category, subCategory string, d *deps) (float64, st
 	return categoryWeightage, subCategoryValue, nil
 }
 
+// risk calculation function
 func calculatePlantRiskScore(contractCategoryWeight,
 	projectCategoryWeight,
 	approvalCategoryWeight,
@@ -129,12 +125,14 @@ func calculatePlantRiskScore(contractCategoryWeight,
 	fmt.Println("hostCountryApprovalSubCategoryValuePer: ", hostCountryApprovalSubCategoryValuePer)
 	fmt.Println("methodologySubCategoryValuePer: ", methodologySubCategoryValuePer)
 
+	// formula for risk score
 	riskScore := (contractCategoryWeight * contractSubCategoryValuePer) +
 		(projectCategoryWeight * projectSubCategoryValuePer) +
 		(approvalCategoryWeight * approvalSubCategoryValuePer) +
 		(hostCountryApprovalCategoryWeight * hostCountryApprovalSubCategoryValuePer) +
 		(methodologyCategoryWeight * methodologySubCategoryValuePer)
 
+	// risk score logic for 10%
 	if contractSubCategoryValuePer == 10 || projectSubCategoryValuePer == 10 || approvalSubCategoryValuePer == 10 {
 		tempRiskScore, _ := decimal.NewFromString("10.0")
 		riskScore, _ = tempRiskScore.Float64()
@@ -144,11 +142,8 @@ func calculatePlantRiskScore(contractCategoryWeight,
 	return riskScore
 }
 
+// function for getting all data required for calculation and returnign risk score
 func plantRiskComputation(pk string, sk string, d *deps) (float64, error) {
-	// sess := session.Must(session.NewSessionWithOptions(session.Options{
-	// 	SharedConfigState: session.SharedConfigEnable,
-	// }))
-	// db := dynamodb.New(sess)
 	db := d.ddb
 
 	input := &dynamodb.GetItemInput{
@@ -177,6 +172,7 @@ func plantRiskComputation(pk string, sk string, d *deps) (float64, error) {
 	fmt.Println("projectStatus: ", projectStatus)
 	fmt.Println("hostCountryApproval: ", hostCountryApproval)
 
+	// getting risk definitions value and sub-category value
 	contractCategoryWeight, contractSubCategoryValue, contractErrValue := getRiskDefinitionValues("Contract Status", contractStatus, d)
 	projectCategoryWeight, projectSubCategoryValue, projectErrValue := getRiskDefinitionValues("Project Status", projectStatus, d)
 	approvalCategoryWeight, approvalSubCategoryValue, approvalErrValue := getRiskDefinitionValues("Registration Status", approvalStatus, d)
@@ -201,10 +197,9 @@ func plantRiskComputation(pk string, sk string, d *deps) (float64, error) {
 	return riskScore, nil
 }
 
+// updating risk score in the table
 func putRiskScore(pk, sk string, riskScore float64, d *deps) {
 	db := d.ddb
-	// riskScoreString := fmt.Sprintf("%f", riskScore)
-	// riskScorePercent := riskScoreString + "%"
 
 	upd := expression.Set(expression.Name("riskScore"), expression.Value(riskScore))
 
@@ -238,15 +233,13 @@ func putRiskScore(pk, sk string, riskScore float64, d *deps) {
 }
 
 func (d *deps) handler(e events.DynamoDBEvent) (string, error) {
-
-	// riskScoresArray := make([]float64, len(e.Records))
-	// errorsMap := make(map[string]string)
 	var riskScore float64
 	var errValue error
 	for _, record := range e.Records {
 		fmt.Printf("Processing request data for event ID %s, type %s.\n", record.EventID, record.EventName)
 		pk := record.Change.NewImage["pk"].String()
 		sk := record.Change.NewImage["sk"].String()
+		// logic for running db streams and risk assesses computation for only seller data
 		if strings.HasPrefix(pk, "sellerName") {
 			riskScore, errValue = plantRiskComputation(pk, sk, d)
 			if errValue == nil {
