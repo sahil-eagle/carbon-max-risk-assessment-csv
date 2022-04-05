@@ -202,6 +202,7 @@ func (d mockedGetItem) UpdateItem(input *dynamodb.UpdateItemInput) (*dynamodb.Up
 
 func TestLambdaReadHandler(t *testing.T) {
 
+	// reading sample dynamodb stream formatted data(../testData/dynamodb-event.json) from external saved file to send as an input stream to handler
 	inputJSON := test.ReadJSONFromFile(t, "../testData/dynamodb-event.json")
 	var inputEvent events.DynamoDBEvent
 	if err := json.Unmarshal(inputJSON, &inputEvent); err != nil {
