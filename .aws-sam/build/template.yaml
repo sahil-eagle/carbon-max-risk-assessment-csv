@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  carbonriskassessmentbucket:
+    Description: S3 Bucket BucketName
+    Type: String
+Resources:
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 60
+  SQSAccessPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+      - Ref: SQSQueue
+      PolicyDocument:
+        Statement:
+        - Action:
+          - SQS:SendMessage
+          Effect: Allow
+          Resource:
+            Fn::GetAtt:
+            - SQSQueue
+            - Arn
+          Principal: '*'
+          Condition:
+            ArnLike:
+              aws:SourceArn:
+                Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - Ref: carbonriskassessmentbucket
+  carbonrisktemplatbucket:
+    Type: AWS::S3::Bucket
+    DependsOn: SQSAccessPolicy
+    Properties:
+      BucketName:
+        Ref: carbonriskassessmentbucket
+      NotificationConfiguration:
+        QueueConfigurations:
+        - Event: s3:ObjectCreated:*
+          Queue:
+            Fn::GetAtt:
+            - SQSQueue
+            - Arn
+  LambdaSourceMappingRiskAssessment:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn:
+    - SQSQueue
+    - SQSTriggeredLambdaHandler
+    Properties:
+      BatchSize: 5
+      Enabled: true
+      EventSourceArn:
+        Fn::GetAtt:
+        - SQSQueue
+        - Arn
+      FunctionName:
+        Fn::GetAtt:
+        - SQSTriggeredLambdaHandler
+        - Arn
+  SQSTriggeredLambdaHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: SQSTriggeredLambdaHandler
+      Handler: csv-upload
+      Description: Function that is called when a file is stored in S3.
+      Runtime: go1.x
+      MemorySize: 128
+      Timeout: 30
+      Policies:
+      - AmazonDynamoDBFullAccess
+    Metadata:
+      SamResourceId: SQSTriggeredLambdaHandler
+  RiskAssessmentComputeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: RiskAssessmentComputeFunction
+      Handler: risk-assessment-compute
+      Description: Risk assessment function that is called by Dynamodb streams.
+      Runtime: go1.x
+      MemorySize: 128
+      Timeout: 30
+      Policies:
+      - AmazonDynamoDBFullAccess
+    Metadata:
+      SamResourceId: RiskAssessmentComputeFunction
+  RiskAssessmentTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: pk
+        AttributeType: S
+      - AttributeName: sk
+        AttributeType: S
+      KeySchema:
+      - AttributeName: pk
+        KeyType: HASH
+      - AttributeName: sk
+        KeyType: RANGE
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      TableName: RiskAssessmentTable
+  RiskAssessmentDynamoDBTableStream:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 1
+      Enabled: true
+      EventSourceArn:
+        Fn::GetAtt:
+        - RiskAssessmentTable
+        - StreamArn
+      FunctionName:
+        Fn::GetAtt:
+        - RiskAssessmentComputeFunction
+        - Arn
+      StartingPosition: LATEST

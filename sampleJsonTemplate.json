@@ -1,0 +1,158 @@
+[
+  {
+      "pk": "categoryName#Contract Status",
+      "sk": "subCategoryName#None",
+      "categoryWeightage": "3/13",
+      "subCategoryValue": "10%"
+  },
+  {
+      "pk": "categoryName#Contract Status",
+      "sk": "subCategoryName#LOC",
+      "categoryWeightage": "3/13",
+      "subCategoryValue": "50%"
+  },
+  {
+      "pk": "categoryName#Contract Status",
+      "sk": "subCategoryName#ERPA",
+      "categoryWeightage": "3/13",
+      "subCategoryValue": "100%"
+  },
+  {
+      "pk": "categoryName#Project Status",
+      "sk": "subCategoryName#Design Stage",
+      "categoryWeightage": "1/13",
+      "subCategoryValue": "10%"
+  },
+  {
+      "pk": "categoryName#Project Status",
+      "sk": "subCategoryName#Under Construction",
+      "categoryWeightage": "1/13",
+      "subCategoryValue": "70%"
+  },
+  {
+      "pk": "categoryName#Project Status",
+      "sk": "subCategoryName#Constructed",
+      "categoryWeightage": "1/13",
+      "subCategoryValue": "100%"
+  },
+  {
+      "pk": "categoryName#Registration Status",
+      "sk": "subCategoryName#PIN",
+      "categoryWeightage": "6/13",
+      "subCategoryValue": "10%"
+  },
+  {
+      "pk": "categoryName#Registration Status",
+      "sk": "subCategoryName#Under Validation",
+      "categoryWeightage": "6/13",
+      "subCategoryValue": "25%"
+  },
+  {
+      "pk": "categoryName#Registration Status",
+      "sk": "subCategoryName#Validated PDD",
+      "categoryWeightage": "6/13",
+      "subCategoryValue": "50%"
+  },
+  {
+      "pk": "categoryName#Registration Status",
+      "sk": "subCategoryName#Registration review",
+      "categoryWeightage": "6/13",
+      "subCategoryValue": "65%"
+  },
+  {
+      "pk": "categoryName#Registration Status",
+      "sk": "subCategoryName#Registration rejected",
+      "categoryWeightage": "6/13",
+      "subCategoryValue": "25%"
+  },
+  {
+      "pk": "categoryName#Registration Status",
+      "sk": "subCategoryName#Under Registration",
+      "categoryWeightage": "6/13",
+      "subCategoryValue": "75%"
+  },
+  {
+      "pk": "categoryName#Registration Status",
+      "sk": "subCategoryName#Registered",
+      "categoryWeightage": "6/13",
+      "subCategoryValue": "85%"
+  },
+  {
+      "pk": "categoryName#Registration Status",
+      "sk": "subCategoryName#Issuance",
+      "categoryWeightage": "6/13",
+      "subCategoryValue": "100%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#HFC",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "100%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#Hydro",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "85%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#Biomass",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "90%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#Methane recovery",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "65%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#Cogen",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "90%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#Bagasse",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "90%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#N20",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "100%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#Fuel Switching",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "85%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#Wind Power",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "100%"
+  },
+  {
+      "pk": "categoryName#Methodology",
+      "sk": "subCategoryName#Solar Power",
+      "categoryWeightage": "2/13",
+      "subCategoryValue": "100%"
+  },
+  {
+      "pk": "categoryName#Host Country Approval",
+      "sk": "subCategoryName#No",
+      "categoryWeightage": "1/13",
+      "subCategoryValue": "50%"
+  },
+  {
+      "pk": "categoryName#Host Country Approval",
+      "sk": "subCategoryName#Yes",
+      "categoryWeightage": "1/13",
+      "subCategoryValue": "100%"
+  }
+]

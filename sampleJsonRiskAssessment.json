@@ -1,0 +1,19 @@
+[
+    {
+        "pk": "uuid",
+        "projectId": "VCS1851",
+        "plantCode": "5540",
+        "riskDefinitions": {
+            "contractStatus": {
+                "none": "10%",
+                "loc": "50%",
+                "erpa": "100%"
+            },
+            "projectStatus": {
+                "designStage": "10%",
+                "underConstruction": "70%",
+                "constructed": "100%"
+            }
+        }
+    }
+]

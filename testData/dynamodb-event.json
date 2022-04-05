@@ -1,0 +1,101 @@
+{
+  "Records": [
+    {
+      "eventID": "f07f8ca4b0b26cb9c4e5e77e69f274ee",
+      "eventName": "INSERT",
+      "eventVersion": "1.1",
+      "eventSource": "aws:dynamodb",
+      "awsRegion": "ap-south-1",
+      "userIdentity": {
+        "type": "Service",
+        "principalId": "dynamodb.amazonaws.com"
+      },
+      "dynamodb": {
+        "ApproximateCreationDateTime": 1480642020,
+        "Keys": {
+          "pk": {
+            "S": "sellerName#Renew Power"
+          },
+          "sk": {
+            "S": "registryProjectName#Renewable Solar Power Project by ReNew Solar Power Private Limited#plantName#Abha Solarfarms Limited"
+          }
+        },
+        "NewImage": {
+          "approvalStatus": {
+            "S": "Under Registration"
+          },
+          "averageAnnualVariationInCapacityFactor": {
+            "S": "3%"
+          },
+          "capacityFactor": {
+            "S": "20%"
+          },
+          "codOfTheProject": {
+            "S": "05/06/2022"
+          },
+          "contractStatus": {
+            "S": "ERPA"
+          },
+          "creditingPeriodEndDate": {
+            "S": "05/06/2027"
+          },
+          "creditingPeriodStartDate": {
+            "S": "05/06/2021"
+          },
+          "currentStatusOfSale": {
+            "S": "Completely available"
+          },
+          "dateOfIssuanceToCC": {
+            "S": "05/06/2022"
+          },
+          "hostCountryApproval": {
+            "S": "Yes"
+          },
+          "methodology": {
+            "S": "Solar Power"
+          },
+          "numberOfIssuedCredits": {
+            "S": "5500"
+          },
+          "pk": {
+            "S": "sellerName#Renew Power"
+          },
+          "plantName": {
+            "S": "Abha Solarfarms Limited"
+          },
+          "projectId": {
+            "S": "VCS1851"
+          },
+          "projectName": {
+            "S": "Renewable Solar Power Project by ReNew Solar Power Private Limited"
+          },
+          "projectStatus": {
+            "S": "Constructed"
+          },
+          "projectType": {
+            "S": "Solar"
+          },
+          "registeredMw": {
+            "S": "10 MW"
+          },          
+          "sellerName": {
+            "S": "Renew Power"
+          },
+          "sk": {
+            "S": "registryProjectName#Renewable Solar Power Project by ReNew Solar Power Private Limited#plantName#Abha Solarfarms Limited"
+          },
+          "vintageEnd": {
+            "S": "31/Dec/2020"
+          },
+          "vintageStart": {
+            "S": "25/12/2019"
+          }
+        },
+        "SequenceNumber": "1405400000000002063282832",
+        "SizeBytes": 54,
+        "StreamViewType": "NEW_AND_OLD_IMAGES"
+      },
+      "eventSourceARN": "arn:aws:dynamodb:ap-south-1:123456789012:table/Example-Table/stream/2016-12-01T00:00:00.000"
+    }
+  ]
+}
